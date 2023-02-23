@@ -1,0 +1,43 @@
+from typing import List
+
+class Point:
+    def __init__(self, x: float, y: float):
+        self.x = x
+        self.y = y
+
+def convex_hull(points: List[Point]) -> List[Point]:
+    # Sort points by x-coordinate (and then by y-coordinate if there's a tie)
+    sorted_points = sorted(points, key=lambda p: (p.x, p.y))
+    n = len(sorted_points)
+    
+    # Helper function to compute cross product of vectors p1p2 and p2p3
+    def cross_product(p1: Point, p2: Point, p3: Point) -> float:
+        return (p2.x - p1.x) * (p3.y - p2.y) - (p2.y - p1.y) * (p3.x - p2.x)
+    
+    # Divide-and-conquer function to find the convex hull (python)
+    def divide_and_conquer(lo: int, hi: int) -> List[Point]:
+        if hi - lo <= 1:
+            return sorted_points[lo:hi]
+        else:
+            mid = (lo + hi) // 2
+            left_hull = divide_and_conquer(lo, mid)
+            right_hull = divide_and_conquer(mid, hi)
+            return merge_hulls(left_hull, right_hull)
+    def merge_hulls(left_hull: List[Point], right_hull: List[Point]) -> List[Point]:
+        # Find the upper tangent
+        i = len(left_hull) - 1
+        j = 0
+        while i >= 0 and j < len(right_hull) and cross_product(left_hull[i], right_hull[0], right_hull[-1]) >= 0:
+            while j < len(right_hull) - 1 and cross_product(left_hull[i], right_hull[j], right_hull[j+1]) >= 0:
+                j += 1
+            i -= 1
+        upper_tangent = left_hull[:i+1] + right_hull[j:] if i >= 0 else right_hull[j:]
+        i = 0
+        j = len(right_hull) - 1
+        while i < len(left_hull) and j >= 0 and cross_product(right_hull[j], left_hull[-1], left_hull[0]) >= 0:
+            while j > 0 and cross_product(right_hull[j], left_hull[i], left_hull[i+1]) >= 0:
+                j -= 1
+            i += 1
+        lower_tangent = left_hull[:i] + right_hull[:j+1] if j >= 0 else left_hull[:i]
+        return upper_tangent + lower_tangent[1:-1]
+    return divide_and_conquer(0, n)
