@@ -6,15 +6,12 @@ class Point:
         self.y = y
 
 def convex_hull(points: List[Point]) -> List[Point]:
-    # Sort points by x-coordinate (and then by y-coordinate if there's a tie)
     sorted_points = sorted(points, key=lambda p: (p.x, p.y))
     n = len(sorted_points)
     
-    # Helper function to compute cross product of vectors p1p2 and p2p3
     def cross_product(p1: Point, p2: Point, p3: Point) -> float:
         return (p2.x - p1.x) * (p3.y - p2.y) - (p2.y - p1.y) * (p3.x - p2.x)
     
-    # Divide-and-conquer function to find the convex hull (python)
     def divide_and_conquer(lo: int, hi: int) -> List[Point]:
         if hi - lo <= 1:
             return sorted_points[lo:hi]
